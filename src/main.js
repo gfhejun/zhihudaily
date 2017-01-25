@@ -3,10 +3,15 @@
 import Vue from 'vue'
 import FastClick from 'fastclick'
 import VueRouter from 'vue-router'
+import VueResource from 'vue-resource'
+import Vuex from 'vuex'
 import App from './App'
 import NewsList from './components/NewsList'
+import store from './vuex/store'
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
+Vue.use(Vuex);
+Vue.use(VueResource);
 
 const routes = [{
 	path: '/newslist',
@@ -23,8 +28,15 @@ const router = new VueRouter({
 
 FastClick.attach(document.body)
 
+//自定义过滤器
+Vue.filter("formatTime", function(dateStr) {
+	return dateStr[4] + dateStr[5] + "月" + dateStr[6] + dateStr[7] + "日";
+})
+
+
 /* eslint-disable no-new */
 new Vue({
 	router,
+	store,
 	render: h => h(App)
 }).$mount('#app')

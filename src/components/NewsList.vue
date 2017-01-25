@@ -1,50 +1,142 @@
 <template>
-  <div>
-    <scroller ref="dailyList">
+  <div id="scroller">
+    <div class="spinner" v-if="loading">
+      <spinner type="lines"></spinner>
+    </div>
+    <scroller ref="dailyList" height="100%"
+      @on-pulldown-loading="loadLatestNews" 
+      :pulldown-config="pulldownConfig"
+      @on-pullup-loading="loadMore" 
+      :pullup-config="pullupConfig"
+      lock-x use-pullup use-pulldown>
       <div>
-        <group>
-          <cell title="title1" value="value1"></cell>
-          <cell title="title2" value="value2"></cell>
-          <cell title="title3" value="value3"></cell>
-          <cell title="title4" value="value4"></cell>
-          <cell title="title5" value="value5"></cell>
-          <cell title="title6" value="value6"></cell>
-          <cell title="title7" value="value7"></cell>
-          <cell title="title8" value="value8"></cell>
-          <cell title="title9" value="value9"></cell>
-          <cell title="title10" value="value10"></cell>
-        </group>
+        <div v-for="news in newsList">
+          <div class="header">{{news.date | formatTime }}</div>
+          <div v-for="story in news.stories" class="item">
+            <div class="title">{{story.title}}</div>
+            <div class="img">
+              <img :src="story.images">
+            </div>
+          </div>
+        </div>
       </div>
     </scroller>
   </div>
 </template>
 
 <script>
-import { Group, Cell, Scroller } from 'vux'
+import { Group, Cell, Scroller, Spinner } from 'vux'
+import { mapState } from 'vuex'
+import store from '../vuex/store'
 
 export default {
   components: {
     Group,
     Cell,
-    Scroller
+    Scroller,
+    Spinner
   },
   data () {
     return {
-      
+      pulldownConfig:{
+        content: '下拉刷新内容',
+        height: 60,
+        autoRefresh: false,
+        downContent: '下拉刷新内容',
+        upContent: '松开刷新',
+        loadingContent: '内容加载中...'
+      },
+      pullupConfig:{
+        content: '上拉加载更多',
+        height: 60,
+        autoRefresh: false,
+        upContent: '上拉加载更多',
+        downContent: '松开刷新',
+        loadingContent: '内容加载中...'
+      }
     }
   },
   created(){
-
+    store.dispatch('loadLatestNews',"init");
+  },
+  methods: {
+    loadLatestNews: function () {
+      store.dispatch('loadLatestNews');
+    },
+    loadMore: function () {
+      store.dispatch('loadMore'); 
+    }
+  },
+  computed: mapState({
+    newsList: state => state.newsList.newsList,
+    loading: state => state.common.loading,
+    upDone: state => state.common.upDone,
+    downDone: state => state.common.downDone
+  }),
+  watch: {
+    loading: function (newValue) {
+      if (!newValue){
+        this.$nextTick(() => {
+          this.$refs.dailyList.reset();
+        });
+      }
+    },
+    upDone: function (newValue) {
+      this.$nextTick(() => {
+          this.$refs.dailyList.donePullup();
+          this.$refs.dailyList.reset();
+      });
+    },
+    downDone: function (newValue) {
+      this.$nextTick(() => {
+          this.$refs.dailyList.donePulldown();
+          this.$refs.dailyList.reset();
+      });
+    }
   }
 }
 </script>
 
-<style>
-.vux-demo {
-  text-align: center;
+<style scoped>
+#scroller{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
 }
-.logo {
-  width: 100px;
-  height: 100px
+
+.spinner{
+  text-align: center;
+  margin-top: 100px;
+}
+
+.header{
+  background-color:#469CE7;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.title{
+  display: inline-block;
+  width: 60%;
+  vertical-align: top;
+  padding: 10px 0 0 10px;
+}
+
+.img{
+  display: inline-block;
+  width: 35%;
+  text-align: right;
+}
+
+.img img{
+  height: 70%;
+  width: 70%;
+  margin: 5px 5px 0 0;
+}
+
+.item{
+  border-bottom: 1px solid lightgray;
 }
 </style>
