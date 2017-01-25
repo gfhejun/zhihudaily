@@ -7,6 +7,7 @@ import VueResource from 'vue-resource'
 import Vuex from 'vuex'
 import App from './App'
 import NewsList from './components/NewsList'
+import NewsDetail from './components/NewsDetail'
 import store from './vuex/store'
 
 Vue.use(VueRouter);
@@ -18,7 +19,11 @@ const routes = [{
 	name: 'NewsList',
 	component: NewsList
 }, {
-	path: '/',
+	path: '/newsdetail/:id',
+	name: 'NewsDetail',
+	component: NewsDetail
+}, {
+	path: '*',
 	redirect: 'NewsList'
 }]
 

@@ -3,7 +3,9 @@
     <div class="spinner" v-if="loading">
       <spinner type="lines"></spinner>
     </div>
-    <scroller ref="dailyList" height="100%"
+    <scroller 
+      v-if="!loading"
+      ref="dailyList" height="100%"
       @on-pulldown-loading="loadLatestNews" 
       :pulldown-config="pulldownConfig"
       @on-pullup-loading="loadMore" 
@@ -12,7 +14,7 @@
       <div>
         <div v-for="news in newsList">
           <div class="header">{{news.date | formatTime }}</div>
-          <div v-for="story in news.stories" class="item">
+          <div v-for="story in news.stories" class="item" @click="loadDetail(story.id)">
             <div class="title">{{story.title}}</div>
             <div class="img">
               <img :src="story.images">
@@ -27,7 +29,6 @@
 <script>
 import { Group, Cell, Scroller, Spinner } from 'vux'
 import { mapState } from 'vuex'
-import store from '../vuex/store'
 
 export default {
   components: {
@@ -57,14 +58,18 @@ export default {
     }
   },
   created(){
-    store.dispatch('loadLatestNews',"init");
+    this.$store.dispatch('loadLatestNews',"init");
   },
   methods: {
     loadLatestNews: function () {
-      store.dispatch('loadLatestNews');
+      this.$store.dispatch('loadLatestNews');
     },
     loadMore: function () {
-      store.dispatch('loadMore'); 
+      this.$store.dispatch('loadMore');
+    },
+    loadDetail: function (id) {
+      this.$store.commit('updateNewsDetailId', id);
+      this.$router.push({ path: '/newsdetail/' + id})
     }
   },
   computed: mapState({
